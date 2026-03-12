@@ -5,16 +5,19 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { QrCode, Map, Info, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n-context";
+import type { TranslationKey } from "@/lib/i18n";
 
 const tabs = [
-  { href: "/", label: "Acceso", icon: QrCode },
-  { href: "/explorar", label: "Explorar", icon: Map },
-  { href: "/huespedes", label: "Huésped", icon: User },
-  { href: "/info", label: "Info", icon: Info },
+  { href: "/", labelKey: "nav.access" as TranslationKey, icon: QrCode },
+  { href: "/explorar", labelKey: "nav.explore" as TranslationKey, icon: Map },
+  { href: "/huespedes", labelKey: "nav.guest" as TranslationKey, icon: User },
+  { href: "/info", labelKey: "nav.info" as TranslationKey, icon: Info },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   // Hide on admin pages
   if (pathname.startsWith("/admin")) return null;
@@ -30,7 +33,7 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "relative flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-colors",
+                "relative flex flex-1 flex-col items-center gap-1 py-3.5 text-sm font-medium transition-colors",
                 isActive
                   ? "text-brand-accent"
                   : "text-text-secondary hover:text-text-primary"
@@ -43,8 +46,8 @@ export function BottomNav() {
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span>{tab.label}</span>
+              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
+              <span>{t(tab.labelKey)}</span>
             </Link>
           );
         })}

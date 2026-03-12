@@ -228,7 +228,7 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-sm">
+      <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl bg-white p-1 shadow-sm scrollbar-none">
         {[
           { key: "negocios" as Tab, label: "Negocios", icon: Store },
           { key: "promos" as Tab, label: "Promos", icon: Tag },
@@ -240,12 +240,12 @@ export default function AdminDashboard() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors ${
-              tab === t.key ? "bg-brand text-white" : "text-text-secondary hover:text-text-primary"
+            className={`flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+              tab === t.key ? "bg-brand text-white shadow-sm" : "text-text-secondary hover:text-text-primary"
             }`}
           >
             <t.icon className="h-4 w-4" />
-            {t.label}
+            <span className="hidden sm:inline">{t.label}</span>
           </button>
         ))}
       </div>

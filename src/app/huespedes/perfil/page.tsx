@@ -16,7 +16,8 @@ import {
   FileText,
   AlertTriangle,
 } from "lucide-react";
-import { PROPERTY_NAME, SUITE_TYPES } from "@/lib/constants";
+import { SUITE_TYPES } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n-context";
 import type { Session } from "@supabase/supabase-js";
 
 interface GuestProfile {
@@ -38,6 +39,7 @@ export default function GuestProfilePage() {
   const [saved, setSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -136,94 +138,91 @@ export default function GuestProfilePage() {
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] px-6 pb-24 pt-8">
-      <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-md">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-text-primary">Mi Perfil</h1>
-            <p className="text-sm text-text-secondary">{PROPERTY_NAME}</p>
-          </div>
+          <h1 className="text-2xl font-bold text-text-primary">{t("profile.title")}</h1>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-base text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
           >
-            <LogOut className="h-4 w-4" />
-            Salir
+            <LogOut className="h-5 w-5" />
+            {t("profile.logout")}
           </button>
         </div>
 
         {/* Profile form */}
-        <div className="mb-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-text-primary">Datos personales</h2>
-          <div className="space-y-4">
+        <div className="mb-6 rounded-2xl border border-border bg-white p-6 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-text-primary">{t("profile.personal")}</h2>
+          <div className="space-y-5">
             <div>
-              <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                <User className="h-3.5 w-3.5" /> Nombre completo
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                <User className="h-4 w-4" /> {t("profile.fullName")}
               </label>
               <input
                 value={profile.full_name}
                 onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none focus:border-brand-accent"
-                placeholder="Tu nombre"
+                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base outline-none focus:border-brand-accent"
+                placeholder={t("profile.namePlaceholder")}
               />
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                <Mail className="h-3.5 w-3.5" /> Correo electrónico
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                <Mail className="h-4 w-4" /> {t("profile.emailLabel")}
               </label>
               <input
                 value={profile.email}
                 disabled
-                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm text-text-secondary outline-none opacity-60"
+                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base text-text-secondary outline-none opacity-60"
               />
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                <Phone className="h-3.5 w-3.5" /> Teléfono
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                <Phone className="h-4 w-4" /> {t("profile.phone")}
               </label>
               <input
                 value={profile.phone}
                 onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none focus:border-brand-accent"
-                placeholder="+52 612 123 4567"
+                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base outline-none focus:border-brand-accent"
+                placeholder={t("profile.phonePlaceholder")}
               />
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                <Home className="h-3.5 w-3.5" /> Tipo de suite
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                <Home className="h-4 w-4" /> {t("profile.suiteType")}
               </label>
               <select
                 value={profile.suite_type}
                 onChange={(e) => setProfile({ ...profile, suite_type: e.target.value })}
-                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none focus:border-brand-accent"
+                className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base outline-none focus:border-brand-accent"
               >
-                <option value="">Seleccionar...</option>
-                {SUITE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                <option value="">{t("profile.selectSuite")}</option>
+                {SUITE_TYPES.map((st) => (
+                  <option key={st} value={st}>{st}</option>
                 ))}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <CalendarDays className="h-3.5 w-3.5" /> Check-in
+                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                  <CalendarDays className="h-4 w-4" /> Check-in
                 </label>
                 <input
                   type="date"
                   value={profile.check_in ?? ""}
                   onChange={(e) => setProfile({ ...profile, check_in: e.target.value || null })}
-                  className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none focus:border-brand-accent"
+                  className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <CalendarDays className="h-3.5 w-3.5" /> Check-out
+                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                  <CalendarDays className="h-4 w-4" /> Check-out
                 </label>
                 <input
                   type="date"
                   value={profile.check_out ?? ""}
                   onChange={(e) => setProfile({ ...profile, check_out: e.target.value || null })}
-                  className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none focus:border-brand-accent"
+                  className="w-full rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base outline-none focus:border-brand-accent"
                 />
               </div>
             </div>
@@ -232,87 +231,87 @@ export default function GuestProfilePage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-4 text-base font-semibold text-white shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
           >
             {saving ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : saved ? (
-              <>✓ Guardado</>
+              <>✓ {t("profile.saved")}</>
             ) : (
               <>
-                <Save className="h-4 w-4" />
-                Guardar cambios
+                <Save className="h-5 w-5" />
+                {t("profile.save")}
               </>
             )}
           </button>
         </div>
 
         {/* ARCO Rights Section */}
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Shield className="h-5 w-5 text-brand-accent" />
-            <h2 className="text-sm font-semibold text-text-primary">Tus derechos ARCO</h2>
+            <h2 className="text-base font-semibold text-text-primary">{t("profile.arcoTitle")}</h2>
           </div>
-          <p className="mb-4 text-xs text-text-secondary leading-relaxed">
-            Bajo la LFPDPPP tienes derecho a Acceder, Rectificar, Cancelar y Oponerte al uso de tus datos personales.
+          <p className="mb-5 text-sm text-text-secondary leading-relaxed">
+            {t("profile.arcoDesc")}
           </p>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* Access: export data */}
             <button
               onClick={handleExportData}
-              className="flex w-full items-center gap-3 rounded-xl border border-border px-4 py-3 text-left transition-colors hover:bg-surface-secondary"
+              className="flex w-full items-center gap-3 rounded-xl border border-border px-4 py-4 text-left transition-colors hover:bg-surface-secondary"
             >
-              <FileText className="h-4 w-4 shrink-0 text-blue-500" />
+              <FileText className="h-5 w-5 shrink-0 text-blue-500" />
               <div>
-                <p className="text-sm font-medium text-text-primary">Descargar mis datos</p>
-                <p className="text-[11px] text-text-secondary">Exporta tu información en formato JSON</p>
+                <p className="text-base font-medium text-text-primary">{t("profile.exportData")}</p>
+                <p className="text-sm text-text-secondary">{t("profile.exportDesc")}</p>
               </div>
             </button>
 
             {/* Cancel: delete data */}
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex w-full items-center gap-3 rounded-xl border border-red-200 px-4 py-3 text-left transition-colors hover:bg-red-50"
+              className="flex w-full items-center gap-3 rounded-xl border border-red-200 px-4 py-4 text-left transition-colors hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4 shrink-0 text-red-500" />
+              <Trash2 className="h-5 w-5 shrink-0 text-red-500" />
               <div>
-                <p className="text-sm font-medium text-red-600">Eliminar mis datos</p>
-                <p className="text-[11px] text-text-secondary">Borra toda tu información permanentemente</p>
+                <p className="text-base font-medium text-red-600">{t("profile.deleteData")}</p>
+                <p className="text-sm text-text-secondary">{t("profile.deleteDesc")}</p>
               </div>
             </button>
           </div>
 
           {/* Delete confirmation */}
           {showDeleteConfirm && (
-            <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4">
+            <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-5">
               <div className="mb-3 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                <p className="text-sm font-semibold text-red-700">¿Estás seguro?</p>
+                <p className="text-base font-semibold text-red-700">{t("profile.deleteConfirm")}</p>
               </div>
-              <p className="mb-4 text-xs text-red-600">
-                Esta acción eliminará permanentemente tu perfil, historial de servicios y datos personales. No se puede deshacer.
+              <p className="mb-4 text-sm text-red-600">
+                {t("profile.deleteWarn")}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface"
+                  className="flex-1 rounded-xl border border-border px-4 py-3 text-base text-text-secondary hover:bg-white"
                 >
-                  Cancelar
+                  {t("profile.cancel")}
                 </button>
                 <button
                   onClick={handleDeleteData}
-                  className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-base font-semibold text-white hover:bg-red-700"
                 >
-                  Sí, eliminar todo
+                  {t("profile.deleteAll")}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        <p className="mt-4 text-center text-[11px] text-text-secondary">
-          <a href="/privacidad" className="underline hover:text-text-primary">Aviso de privacidad</a>
+        <p className="mt-5 text-center text-sm text-text-secondary">
+          <a href="/privacidad" className="underline hover:text-text-primary">{t("profile.privacy")}</a>
         </p>
       </div>
     </main>

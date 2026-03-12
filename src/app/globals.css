@@ -1,31 +1,21 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   /* Santa Cruz Suites Brand Colors */
   --color-brand: #1a1a2e;
   --color-brand-accent: #e2b96f;
   --color-brand-light: #f5f0e8;
 
-  /* Neutral palette */
-  --color-surface: #ffffff;
-  --color-surface-secondary: #f8f7f4;
+  /* Warm neutral palette */
+  --color-surface: #faf9f7;
+  --color-surface-secondary: #f3f1ed;
   --color-text-primary: #1a1a2e;
-  --color-text-secondary: #6b7280;
-  --color-border: #e5e5e5;
+  --color-text-secondary: #52525b;
+  --color-border: #e0ddd8;
 
   /* Status */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
-}
-
-.dark {
-  --color-surface: #0f0f1a;
-  --color-surface-secondary: #1a1a2e;
-  --color-text-primary: #f5f0e8;
-  --color-text-secondary: #9ca3af;
-  --color-border: #2d2d44;
 }
 
 @theme inline {
@@ -46,6 +36,8 @@ body {
   background-color: var(--color-surface);
   color: var(--color-text-primary);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -53,7 +45,6 @@ body {
 /* PWA standalone mode adjustments */
 @media (display-mode: standalone) {
   body {
-    /* Safe area insets for notched devices */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -68,4 +59,39 @@ html {
 html,
 body {
   overscroll-behavior: none;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible ring for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-brand-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* WhatsApp FAB pulse animation */
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

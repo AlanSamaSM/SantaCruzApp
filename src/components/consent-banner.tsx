@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Shield, X } from "lucide-react";
-import { STORAGE_KEYS, PROPERTY_NAME } from "@/lib/constants";
+import { STORAGE_KEYS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n-context";
 
 type ConsentLevel = "all" | "essential" | null;
 
@@ -23,11 +24,11 @@ export function useConsent() {
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const stored = getStoredConsent();
     if (!stored) {
-      // Show banner after a brief delay for smoother UX
       const timer = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(timer);
     }
@@ -42,30 +43,28 @@ export function ConsentBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-16 z-[60] mx-4 animate-in slide-in-from-bottom-4 fade-in duration-300">
-      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+    <div className="fixed inset-x-0 bottom-20 z-[60] mx-4 animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-white p-5 shadow-2xl">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-brand-accent" />
-            <h3 className="text-sm font-semibold text-text-primary">
-              Tu privacidad es importante
+            <h3 className="text-base font-semibold text-text-primary">
+              {t("consent.title")}
             </h3>
           </div>
           <button
             onClick={() => handleConsent("essential")}
-            className="text-text-secondary hover:text-text-primary"
-            aria-label="Cerrar"
+            className="rounded-full p-2 text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
+            aria-label={t("common.close")}
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mb-4 text-xs leading-relaxed text-text-secondary">
-          {PROPERTY_NAME} utiliza almacenamiento local para mejorar tu
-          experiencia. Con tu consentimiento, habilitaremos funciones como el
-          modo offline y la geolocalización en el mapa. Puedes consultar nuestro{" "}
+        <p className="mb-4 text-sm leading-relaxed text-text-secondary">
+          {t("consent.text")}{" "}
           <a href="/privacidad" className="underline hover:text-brand-accent">
-            Aviso de Privacidad
+            {t("consent.privacyLink")}
           </a>
           .
         </p>
@@ -73,15 +72,15 @@ export function ConsentBanner() {
         <div className="flex gap-3">
           <button
             onClick={() => handleConsent("essential")}
-            className="flex-1 rounded-lg border border-border px-4 py-2.5 text-xs font-medium text-text-primary transition-colors hover:bg-surface-secondary"
+            className="flex-1 rounded-xl border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
           >
-            Solo esenciales
+            {t("consent.essential")}
           </button>
           <button
             onClick={() => handleConsent("all")}
-            className="flex-1 rounded-lg bg-brand px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-brand/90"
+            className="flex-1 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand/90"
           >
-            Aceptar todo
+            {t("consent.acceptAll")}
           </button>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { KeyRound, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
-import { PROPERTY_NAME } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n-context";
 import type { Session } from "@supabase/supabase-js";
 
 interface BookingData {
@@ -26,6 +26,7 @@ export default function GuestLoginPage() {
   const [error, setError] = useState("");
   const [existingSession, setExistingSession] = useState<Session | null>(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   // If logged in AND has a linked booking, redirect to profile
   // If logged in but NO linked booking, stay here to enter code
@@ -68,7 +69,7 @@ export default function GuestLoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Código no válido");
+        setError(data.error || t("guest.errorConnection"));
         setLoading(false);
         return;
       }
@@ -76,7 +77,7 @@ export default function GuestLoginPage() {
       setBooking(data.booking);
       setStep("confirm");
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError(t("guest.errorConnection"));
     }
     setLoading(false);
   }
@@ -109,7 +110,7 @@ export default function GuestLoginPage() {
         });
 
         if (signInError) {
-          setError("No se pudo crear tu cuenta. Contacta a recepción.");
+          setError(t("guest.errorAccount"));
           setLoading(false);
           return;
         }
@@ -119,7 +120,7 @@ export default function GuestLoginPage() {
       }
 
       if (!session) {
-        setError("No se pudo iniciar sesión. Contacta a recepción.");
+        setError(t("guest.errorSession"));
         setLoading(false);
         return;
       }
@@ -165,7 +166,7 @@ export default function GuestLoginPage() {
 
     if (!linkRes.ok) {
       const linkData = await linkRes.json();
-      setError(linkData.error || "No se pudo vincular la reserva.");
+      setError(linkData.error || t("guest.errorLink"));
       setLoading(false);
       return;
     }
@@ -177,45 +178,45 @@ export default function GuestLoginPage() {
   // Step 2: Confirmation screen
   if (step === "confirm" && booking) {
     return (
-      <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 pb-20">
-        <div className="w-full max-w-sm">
+      <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 pb-24">
+        <div className="w-full max-w-md">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
-            <h1 className="text-xl font-bold text-text-primary">¡Reserva encontrada!</h1>
-            <p className="mt-1 text-sm text-text-secondary">Confirma tus datos para activar tu acceso</p>
+            <h1 className="text-2xl font-bold text-text-primary">{t("guest.found")}</h1>
+            <p className="mt-1 text-base text-text-secondary">{t("guest.confirmHint")}</p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Huésped</span>
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <div className="space-y-4">
+              <div className="flex justify-between text-base">
+                <span className="text-text-secondary">{t("guest.name")}</span>
                 <span className="font-medium text-text-primary">{booking.guest_name || "—"}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Email</span>
+              <div className="flex justify-between text-base">
+                <span className="text-text-secondary">{t("guest.email")}</span>
                 <span className="font-medium text-text-primary">{booking.guest_email}</span>
               </div>
               {booking.suite_type && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Suite</span>
+                <div className="flex justify-between text-base">
+                  <span className="text-text-secondary">{t("guest.suite")}</span>
                   <span className="font-medium text-text-primary">{booking.suite_type}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Check-in</span>
+              <div className="flex justify-between text-base">
+                <span className="text-text-secondary">{t("guest.checkin")}</span>
                 <span className="font-medium text-text-primary">{booking.check_in}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Check-out</span>
+              <div className="flex justify-between text-base">
+                <span className="text-text-secondary">{t("guest.checkout")}</span>
                 <span className="font-medium text-text-primary">{booking.check_out}</span>
               </div>
             </div>
 
             {error && (
-              <div className="mt-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                <AlertTriangle className="h-4 w-4 shrink-0" />
+              <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 p-4 text-sm text-red-600">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
                 {error}
               </div>
             )}
@@ -223,23 +224,23 @@ export default function GuestLoginPage() {
             <button
               onClick={handleActivate}
               disabled={loading}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-success py-4 text-base font-semibold text-white shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
             >
               {loading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <>
-                  Activar mi acceso
-                  <ArrowRight className="h-4 w-4" />
+                  {t("guest.activate")}
+                  <ArrowRight className="h-5 w-5" />
                 </>
               )}
             </button>
 
             <button
               onClick={() => { setStep("code"); setBooking(null); setError(""); }}
-              className="mt-3 w-full text-center text-sm text-text-secondary hover:text-text-primary"
+              className="mt-4 w-full py-2 text-center text-base text-text-secondary hover:text-text-primary"
             >
-              Usar otro código
+              {t("guest.otherCode")}
             </button>
           </div>
         </div>
@@ -249,22 +250,22 @@ export default function GuestLoginPage() {
 
   // Step 1: Enter access code
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 pb-20">
-      <div className="w-full max-w-sm">
+    <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 pb-24">
+      <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-xl font-bold text-text-primary">Acceso de Huésped</h1>
-          <p className="mt-2 text-sm text-text-secondary">
-            Ingresa el código de acceso que recibiste de {PROPERTY_NAME}.
+          <h1 className="text-2xl font-bold text-text-primary">{t("guest.title")}</h1>
+          <p className="mt-2 text-base text-text-secondary">
+            {t("guest.subtitle")}
           </p>
         </div>
 
-        <form onSubmit={handleVerifyCode} className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-          <div className="mb-4">
-            <label htmlFor="access-code" className="mb-1 block text-sm font-medium text-text-secondary">
-              Código de acceso
+        <form onSubmit={handleVerifyCode} className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <label htmlFor="access-code" className="mb-2 block text-base font-medium text-text-secondary">
+              {t("guest.codeLabel")}
             </label>
             <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+              <KeyRound className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
               <input
                 id="access-code"
                 type="text"
@@ -272,34 +273,35 @@ export default function GuestLoginPage() {
                 autoComplete="off"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className="w-full rounded-xl border border-border bg-surface-secondary py-3 pl-10 pr-4 text-center text-sm font-mono tracking-widest text-text-primary outline-none transition-colors focus:border-brand-accent uppercase"
-                placeholder="SCX-XXXXXX"
+                className="w-full rounded-xl border border-border bg-surface-secondary py-4 pl-12 pr-4 text-center text-2xl font-mono tracking-[0.2em] text-text-primary outline-none transition-colors focus:border-brand-accent uppercase"
+                placeholder={t("guest.codePlaceholder")}
                 maxLength={10}
               />
             </div>
+            <p className="mt-2 text-center text-sm text-text-secondary">{t("guest.codeHint")}</p>
           </div>
 
           {error && (
-            <p className="mb-4 rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">{error}</p>
+            <p className="mb-4 rounded-xl bg-red-50 p-4 text-center text-sm text-red-600">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading || code.trim().length < 5}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-4 text-base font-semibold text-white shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
           >
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <>
-                Verificar código
-                <ArrowRight className="h-4 w-4" />
+                {t("guest.verify")}
+                <ArrowRight className="h-5 w-5" />
               </>
             )}
           </button>
 
-          <p className="mt-4 text-center text-[11px] text-text-secondary">
-            Recibirás tu código al confirmar tu reserva en {PROPERTY_NAME}.
+          <p className="mt-5 text-center text-sm text-text-secondary">
+            {t("guest.codeFooter")}
           </p>
         </form>
       </div>

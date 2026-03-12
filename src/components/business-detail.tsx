@@ -87,10 +87,10 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 100) onClose();
             }}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-surface shadow-2xl pb-[env(safe-area-inset-bottom)]"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-white shadow-2xl pb-[env(safe-area-inset-bottom)]"
           >
             {/* Drag handle */}
-            <div className="sticky top-0 flex justify-center bg-surface pt-3 pb-2">
+            <div className="sticky top-0 flex justify-center bg-white pt-3 pb-2">
               <div className="h-1 w-10 rounded-full bg-border" />
             </div>
 
@@ -128,7 +128,7 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
               </div>
 
               {/* Description */}
-              <p className="mb-4 text-sm leading-relaxed text-text-secondary">
+              <p className="mb-4 text-base leading-relaxed text-text-secondary">
                 {business.description}
               </p>
 
@@ -168,9 +168,9 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}&travelmode=walking`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-border/40"
+                className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base font-medium text-text-primary shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
               >
-                <Navigation className="h-4 w-4" />
+                <Navigation className="h-5 w-5" />
                 Cómo llegar
               </a>
 

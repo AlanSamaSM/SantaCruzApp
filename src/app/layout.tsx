@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
 import { ConsentBanner } from "@/components/consent-banner";
+import { WhatsAppFAB } from "@/components/whatsapp-fab";
+import { LanguageProvider } from "@/lib/i18n-context";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,8 +33,6 @@ export const viewport: Viewport = {
   themeColor: "#1a1a2e",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -48,9 +48,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
       <body className="bg-surface font-sans antialiased">
-        {children}
-        <BottomNav />
-        <ConsentBanner />
+        <LanguageProvider>
+          {children}
+          <BottomNav />
+          <WhatsAppFAB />
+          <ConsentBanner />
+        </LanguageProvider>
       </body>
     </html>
   );

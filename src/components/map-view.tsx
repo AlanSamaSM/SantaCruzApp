@@ -93,17 +93,17 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
               aria-label={`Ver ${biz.name}`}
             >
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-transform group-hover:scale-110 ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full shadow-md transition-transform group-hover:scale-110 group-active:scale-95 ${
                   biz.isFeatured
-                    ? "ring-2 ring-brand-accent ring-offset-1"
+                    ? "ring-2 ring-brand-accent ring-offset-2"
                     : ""
                 }`}
                 style={{ backgroundColor: meta.color }}
               >
-                <span className="text-base">{meta.emoji}</span>
+                <span className="text-lg">{meta.emoji}</span>
               </div>
               {biz.promotion && (
-                <span className="mt-0.5 rounded-full bg-brand-accent px-1.5 py-0 text-[9px] font-bold text-brand shadow-sm">
+                <span className="mt-0.5 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-bold text-brand shadow-sm">
                   PROMO
                 </span>
               )}
