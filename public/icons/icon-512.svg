@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#1a1a2e"/>
+  <text x="256" y="200" text-anchor="middle" fill="#e2b96f" font-family="system-ui" font-weight="700" font-size="108">SC</text>
+  <text x="256" y="274" text-anchor="middle" fill="#f5f0e8" font-family="system-ui" font-weight="400" font-size="38">SUITES</text>
+  <rect x="146" y="296" width="220" height="2" fill="#e2b96f" opacity="0.5"/>
+  <text x="256" y="342" text-anchor="middle" fill="#f5f0e8" font-family="system-ui" font-weight="300" font-size="26">LA PAZ BCS</text>
+</svg>

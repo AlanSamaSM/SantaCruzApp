@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Santa Cruz Suites Brand Colors */
+  --color-brand: #1a1a2e;
+  --color-brand-accent: #e2b96f;
+  --color-brand-light: #f5f0e8;
+
+  /* Neutral palette */
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f8f7f4;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e5e5;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+}
+
+.dark {
+  --color-surface: #0f0f1a;
+  --color-surface-secondary: #1a1a2e;
+  --color-text-primary: #f5f0e8;
+  --color-text-secondary: #9ca3af;
+  --color-border: #2d2d44;
+}
+
+@theme inline {
+  --color-brand: var(--color-brand);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-brand-light: var(--color-brand-light);
+  --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* PWA standalone mode adjustments */
+@media (display-mode: standalone) {
+  body {
+    /* Safe area insets for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent overscroll bounce on mobile */
+html,
+body {
+  overscroll-behavior: none;
+}
