@@ -10,12 +10,17 @@ export function CategoryFilter() {
   ][];
 
   return (
-    <div className="absolute left-3 top-3 z-10 rounded-xl border border-border bg-white/90 px-4 py-3 shadow-lg backdrop-blur-sm">
+    <div className="absolute left-3 top-3 z-10 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-xl backdrop-blur-md">
       <div className="flex flex-wrap gap-3">
         {categories.map(([key, meta]) => (
-          <div key={key} className="flex items-center gap-1.5">
-            <span className="text-sm">{meta.emoji}</span>
-            <span className="text-xs font-medium text-text-secondary">
+          <div key={key} className="flex items-center gap-2">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
+              style={{ backgroundColor: meta.color }}
+            >
+              <span className="text-xs">{meta.emoji}</span>
+            </div>
+            <span className="text-xs font-semibold text-text-primary">
               {meta.label}
             </span>
           </div>

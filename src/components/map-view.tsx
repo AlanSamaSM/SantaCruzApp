@@ -39,7 +39,7 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
       {...viewState}
       onMove={handleMove}
       mapboxAccessToken={MAPBOX_TOKEN}
-      mapStyle="mapbox://styles/mapbox/light-v11"
+      mapStyle="mapbox://styles/mapbox/streets-v12"
       style={{ width: "100%", height: "100%" }}
       maxZoom={18}
       minZoom={12}
@@ -59,18 +59,21 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
         longitude={SANTA_CRUZ_COORDS.lng}
         anchor="bottom"
       >
-        <div className="flex flex-col items-center">
-          <div className="rounded-full bg-brand p-2 shadow-lg ring-2 ring-white">
-            <MapPin className="h-5 w-5 text-brand-accent" />
+        <div className="flex flex-col items-center animate-marker-drop">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-brand-accent/40 animate-pulse-ring" />
+            <div className="relative rounded-full bg-gradient-to-br from-brand to-brand/80 p-2.5 shadow-xl ring-3 ring-white">
+              <MapPin className="h-6 w-6 text-brand-accent" />
+            </div>
           </div>
-          <span className="mt-1 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white shadow">
+          <span className="mt-1.5 rounded-full bg-brand px-3 py-1 text-[11px] font-bold text-white shadow-lg">
             Santa Cruz
           </span>
         </div>
       </Marker>
 
       {/* Business markers */}
-      {businesses.map((biz) => {
+      {businesses.map((biz, i) => {
         const meta = CATEGORY_META[biz.category];
         return (
           <Marker
@@ -89,22 +92,30 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
             }}
           >
             <button
-              className="group flex flex-col items-center outline-none"
+              className="group flex flex-col items-center outline-none animate-marker-drop"
+              style={{ animationDelay: `${i * 60}ms` }}
               aria-label={`Ver ${biz.name}`}
             >
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-full shadow-md transition-transform group-hover:scale-110 group-active:scale-95 ${
-                  biz.isFeatured
-                    ? "ring-2 ring-brand-accent ring-offset-2"
-                    : ""
-                }`}
-                style={{ backgroundColor: meta.color }}
-              >
-                <span className="text-lg">{meta.emoji}</span>
+              {/* Colored glow behind marker */}
+              <div className="relative">
+                <div
+                  className="absolute -inset-1 rounded-full opacity-30 blur-sm transition-opacity group-hover:opacity-50"
+                  style={{ backgroundColor: meta.color }}
+                />
+                <div
+                  className={`relative flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform group-hover:scale-115 group-active:scale-95 ${
+                    biz.isFeatured
+                      ? "ring-2 ring-brand-accent ring-offset-2"
+                      : "ring-2 ring-white/80"
+                  }`}
+                  style={{ backgroundColor: meta.color }}
+                >
+                  <span className="text-xl drop-shadow-sm">{meta.emoji}</span>
+                </div>
               </div>
               {biz.promotion && (
-                <span className="mt-0.5 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-bold text-brand shadow-sm">
-                  PROMO
+                <span className="mt-1 rounded-full bg-gradient-to-r from-brand-accent to-amber-400 px-2.5 py-0.5 text-[10px] font-bold text-brand shadow-md animate-bounce-subtle">
+                  ✨ PROMO
                 </span>
               )}
             </button>
