@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useState, useMemo } from "react";
+import { useRef, useCallback, useState } from "react";
 import MapGL, {
   Marker,
   NavigationControl,
@@ -11,18 +11,17 @@ import MapGL, {
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
 import { SANTA_CRUZ_COORDS, MAP_DEFAULT_ZOOM } from "@/lib/constants";
-import { getBusinessesWithPromotions } from "@/lib/data";
 import { CATEGORY_META, type BusinessWithPromotion } from "@/lib/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 interface MapViewProps {
+  businesses: BusinessWithPromotion[];
   onSelectBusiness: (business: BusinessWithPromotion) => void;
 }
 
-export function MapView({ onSelectBusiness }: MapViewProps) {
+export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
-  const businesses = useMemo(() => getBusinessesWithPromotions(), []);
 
   const [viewState, setViewState] = useState({
     latitude: SANTA_CRUZ_COORDS.lat as number,

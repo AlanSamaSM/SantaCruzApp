@@ -1,24 +1,8 @@
-"use client";
+import { ExplorarClient } from "@/components/explorar-client";
+import { fetchBusinessesWithPromotions } from "@/lib/queries";
 
-import { useState } from "react";
-import { MapView } from "@/components/map-view";
-import { BusinessDetail } from "@/components/business-detail";
-import { CategoryFilter } from "@/components/category-filter";
-import type { BusinessWithPromotion } from "@/lib/types";
+export default async function ExplorarPage() {
+  const businesses = await fetchBusinessesWithPromotions();
 
-export default function ExplorarPage() {
-  const [selected, setSelected] = useState<BusinessWithPromotion | null>(null);
-
-  return (
-    <main className="relative h-[calc(100dvh-4rem)]">
-      {/* Full-screen map */}
-      <MapView onSelectBusiness={setSelected} />
-
-      {/* Category legend — top left */}
-      <CategoryFilter />
-
-      {/* Business detail bottom sheet */}
-      <BusinessDetail business={selected} onClose={() => setSelected(null)} />
-    </main>
-  );
+  return <ExplorarClient businesses={businesses} />;
 }
