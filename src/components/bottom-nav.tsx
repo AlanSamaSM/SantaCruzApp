@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { QrCode, Map, Info } from "lucide-react";
+import { QrCode, Map, Info, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { href: "/", label: "Acceso", icon: QrCode },
   { href: "/explorar", label: "Explorar", icon: Map },
+  { href: "/huespedes", label: "Huésped", icon: User },
   { href: "/info", label: "Info", icon: Info },
 ] as const;
 
@@ -22,7 +23,7 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-surface/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex max-w-lg items-center justify-around">
         {tabs.map((tab) => {
-          const isActive = pathname === tab.href;
+          const isActive = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
           const Icon = tab.icon;
           return (
             <Link

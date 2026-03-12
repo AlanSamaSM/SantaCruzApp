@@ -11,6 +11,11 @@ import {
   BarChart3,
   Save,
   X,
+  Users,
+  ShoppingBag,
+  CheckCircle,
+  Clock,
+  XCircle,
 } from "lucide-react";
 import { CATEGORY_META } from "@/lib/types";
 import type { BusinessCategory } from "@/lib/types";
@@ -48,9 +53,11 @@ interface Stats {
   activePromos: number;
   totalRedemptions: number;
   redemptionsThisWeek: number;
+  totalGuests: number;
+  pendingRequests: number;
 }
 
-type Tab = "negocios" | "promos" | "stats";
+type Tab = "negocios" | "promos" | "huespedes" | "solicitudes" | "stats";
 
 const emptyBusiness: Omit<BusinessRow, "id"> = {
   name: "",
@@ -82,8 +89,13 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("negocios");
   const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
   const [promotions, setPromotions] = useState<PromotionRow[]>([]);
-  const [stats, setStats] = useState<Stats>({ totalBusinesses: 0, activePromos: 0, totalRedemptions: 0, redemptionsThisWeek: 0 });
+  const [stats, setStats] = useState<Stats>({ totalBusinesses: 0, activePromos: 0, totalRedemptions: 0, redemptionsThisWeek: 0, totalGuests: 0, pendingRequests: 0 });
   const [loading, setLoading] = useState(true);
+
+  // Guests & requests
+  const [guests, setGuests] = useState<{ id: string; full_name: string; email: string; phone: string; suite_type: string; check_in: string | null; check_out: string | null }[]>([]);
+  const [serviceRequests, setServiceRequests] = useState<{ id: string; guest_id: string; service_id: string; status: string; requested_date: string | null; message: string; created_at: string }[]>([]);
+  const [servicesCatalog, setServicesCatalog] = useState<{ id: string; name: string; icon: string }[]>([]);
 
   // Business form
   const [editingBiz, setEditingBiz] = useState<Partial<BusinessRow> | null>(null);
@@ -95,10 +107,13 @@ export default function AdminDashboard() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [bizRes, promoRes, redemptionRes] = await Promise.all([
+    const [bizRes, promoRes, redemptionRes, guestRes, reqRes, svcRes] = await Promise.all([
       supabase.from("businesses").select("*").order("name").returns<BusinessRow[]>(),
       supabase.from("promotions").select("*").order("title").returns<PromotionRow[]>(),
       supabase.from("redemptions").select("id, redeemed_at").returns<{ id: string; redeemed_at: string }[]>(),
+      supabase.from("guests").select("*").order("created_at", { ascending: false }).returns<{ id: string; full_name: string; email: string; phone: string; suite_type: string; check_in: string | null; check_out: string | null }[]>(),
+      supabase.from("service_requests").select("*").order("created_at", { ascending: false }).returns<{ id: string; guest_id: string; service_id: string; status: string; requested_date: string | null; message: string; created_at: string }[]>(),
+      supabase.from("services").select("id, name, icon").returns<{ id: string; name: string; icon: string }[]>(),
     ]);
 
     const biz = bizRes.data ?? [];
@@ -108,12 +123,20 @@ export default function AdminDashboard() {
     setBusinesses(biz);
     setPromotions(promos);
 
+    const guestsData = guestRes.data ?? [];
+    const requestsData = reqRes.data ?? [];
+    setGuests(guestsData);
+    setServiceRequests(requestsData);
+    setServicesCatalog(svcRes.data ?? []);
+
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
     setStats({
       totalBusinesses: biz.length,
       activePromos: promos.filter((p) => p.is_active).length,
       totalRedemptions: redemptions.length,
       redemptionsThisWeek: redemptions.filter((r) => r.redeemed_at >= weekAgo).length,
+      totalGuests: guestsData.length,
+      pendingRequests: requestsData.filter((r) => r.status === "pending").length,
     });
 
     setLoading(false);
@@ -181,11 +204,13 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-xl bg-surface p-1 shadow-sm">
+      <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-sm">
         {[
           { key: "negocios" as Tab, label: "Negocios", icon: Store },
-          { key: "promos" as Tab, label: "Promociones", icon: Tag },
-          { key: "stats" as Tab, label: "Estadísticas", icon: BarChart3 },
+          { key: "promos" as Tab, label: "Promos", icon: Tag },
+          { key: "huespedes" as Tab, label: "Huéspedes", icon: Users },
+          { key: "solicitudes" as Tab, label: "Solicitudes", icon: ShoppingBag },
+          { key: "stats" as Tab, label: "Stats", icon: BarChart3 },
         ].map((t) => (
           <button
             key={t.key}
@@ -579,6 +604,8 @@ export default function AdminDashboard() {
               { label: "Promos activas", value: stats.activePromos, icon: Tag, color: "bg-amber-50 text-amber-600" },
               { label: "Canjes totales", value: stats.totalRedemptions, icon: BarChart3, color: "bg-green-50 text-green-600" },
               { label: "Canjes (7 días)", value: stats.redemptionsThisWeek, icon: BarChart3, color: "bg-purple-50 text-purple-600" },
+              { label: "Huéspedes", value: stats.totalGuests, icon: Users, color: "bg-indigo-50 text-indigo-600" },
+              { label: "Solicitudes pend.", value: stats.pendingRequests, icon: ShoppingBag, color: "bg-orange-50 text-orange-600" },
             ].map((stat) => (
               <div key={stat.label} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
                 <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
@@ -604,6 +631,99 @@ export default function AdminDashboard() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============ HUÉSPEDES TAB ============ */}
+      {tab === "huespedes" && (
+        <div>
+          <h2 className="mb-4 text-lg font-bold text-text-primary">Huéspedes ({guests.length})</h2>
+          <div className="space-y-2">
+            {guests.map((guest) => (
+              <div key={guest.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50">
+                    <Users className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-text-primary">{guest.full_name || "Sin nombre"}</p>
+                    <p className="text-xs text-text-secondary">{guest.email}</p>
+                  </div>
+                  {guest.suite_type && (
+                    <span className="rounded-full bg-brand-accent/10 px-2.5 py-1 text-[10px] font-semibold text-brand-accent">
+                      {guest.suite_type}
+                    </span>
+                  )}
+                </div>
+                {(guest.check_in || guest.check_out) && (
+                  <div className="mt-2 flex gap-4 pl-[52px] text-xs text-text-secondary">
+                    {guest.check_in && <span>Check-in: {guest.check_in}</span>}
+                    {guest.check_out && <span>Check-out: {guest.check_out}</span>}
+                  </div>
+                )}
+                {guest.phone && (
+                  <p className="mt-1 pl-[52px] text-xs text-text-secondary">Tel: {guest.phone}</p>
+                )}
+              </div>
+            ))}
+            {guests.length === 0 && (
+              <p className="py-12 text-center text-sm text-text-secondary">
+                No hay huéspedes registrados aún.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ============ SOLICITUDES TAB ============ */}
+      {tab === "solicitudes" && (
+        <div>
+          <h2 className="mb-4 text-lg font-bold text-text-primary">Solicitudes de servicio ({serviceRequests.length})</h2>
+          <div className="space-y-2">
+            {serviceRequests.map((req) => {
+              const guest = guests.find((g) => g.id === req.guest_id);
+              const service = servicesCatalog.find((s) => s.id === req.service_id);
+              const statusConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
+                pending: { label: "Pendiente", color: "bg-yellow-100 text-yellow-700", icon: Clock },
+                confirmed: { label: "Confirmado", color: "bg-blue-100 text-blue-700", icon: CheckCircle },
+                completed: { label: "Completado", color: "bg-green-100 text-green-700", icon: CheckCircle },
+                cancelled: { label: "Cancelado", color: "bg-red-100 text-red-600", icon: XCircle },
+              };
+              const status = statusConfig[req.status] ?? statusConfig.pending;
+              return (
+                <div key={req.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{service?.icon ?? "📋"}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-text-primary">{service?.name ?? "Servicio"}</p>
+                      <p className="text-xs text-text-secondary">
+                        {guest?.full_name || guest?.email || "Huésped"} · {new Date(req.created_at).toLocaleDateString("es-MX")}
+                      </p>
+                      {req.message && <p className="mt-1 text-xs text-text-secondary italic">\"{req.message}\"</p>}
+                    </div>
+                    <select
+                      value={req.status}
+                      onChange={async (e) => {
+                        await supabase.from("service_requests").update({ status: e.target.value }).eq("id", req.id);
+                        fetchData();
+                      }}
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold outline-none ${status.color}`}
+                    >
+                      <option value="pending">Pendiente</option>
+                      <option value="confirmed">Confirmado</option>
+                      <option value="completed">Completado</option>
+                      <option value="cancelled">Cancelado</option>
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
+            {serviceRequests.length === 0 && (
+              <p className="py-12 text-center text-sm text-text-secondary">
+                No hay solicitudes de servicio.
+              </p>
+            )}
           </div>
         </div>
       )}
