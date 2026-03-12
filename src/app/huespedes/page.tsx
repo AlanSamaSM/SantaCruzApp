@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { KeyRound, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
 import { PROPERTY_NAME } from "@/lib/constants";
+import type { Session } from "@supabase/supabase-js";
 
 interface BookingData {
   id: string;
@@ -23,12 +24,31 @@ export default function GuestLoginPage() {
   const [booking, setBooking] = useState<BookingData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [existingSession, setExistingSession] = useState<Session | null>(null);
   const router = useRouter();
 
-  // If already logged in, redirect to profile
+  // If logged in AND has a linked booking, redirect to profile
+  // If logged in but NO linked booking, stay here to enter code
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.push("/huespedes/perfil");
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return;
+      setExistingSession(session);
+
+      // Check if this user already has a linked booking
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: linked } = await supabase
+        .from("lodgify_bookings")
+        .select("id")
+        .eq("guest_id", session.user.id)
+        .in("status", ["active", "checked_in"])
+        .lte("check_in", today)
+        .gte("check_out", today)
+        .limit(1)
+        .maybeSingle();
+
+      if (linked) {
+        router.push("/huespedes/perfil");
+      }
     });
   }, [router]);
 
@@ -61,56 +81,70 @@ export default function GuestLoginPage() {
     setLoading(false);
   }
 
-  // Step 2: Create guest account with booking data
+  // Step 2: Create guest account (or use existing) and link booking
   async function handleActivate() {
     if (!booking) return;
     setLoading(true);
     setError("");
 
-    // Sign up / sign in with email+password using the access code as password
-    // This is secure because: the code is unique, non-guessable, and time-bounded
-    const email = booking.guest_email;
-    const password = code.trim().toUpperCase();
+    let session = existingSession;
 
-    // Try sign up first
-    let session;
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { role: "guest" } },
-    });
+    // Only sign up / sign in if not already logged in
+    if (!session) {
+      const email = booking.guest_email;
+      const password = code.trim().toUpperCase();
 
-    if (signUpError) {
-      // If user already exists, try sign in
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // Try sign up first
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: { data: { role: "guest" } },
       });
 
-      if (signInError) {
-        setError("No se pudo crear tu cuenta. Contacta a recepción.");
+      if (signUpError) {
+        // If user already exists, try sign in
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          setError("No se pudo crear tu cuenta. Contacta a recepción.");
+          setLoading(false);
+          return;
+        }
+        session = signInData.session;
+      } else {
+        session = signUpData.session;
+      }
+
+      if (!session) {
+        setError("No se pudo iniciar sesión. Contacta a recepción.");
         setLoading(false);
         return;
       }
-      session = signInData.session;
-    } else {
-      session = signUpData.session;
     }
 
-    if (!session) {
-      setError("No se pudo iniciar sesión. Intenta de nuevo.");
-      setLoading(false);
-      return;
-    }
-
-    // Create / update guest profile with booking data
+    // Create / update guest profile (authenticated INSERT/UPDATE works via RLS)
     const { data: existingGuest } = await supabase
       .from("guests")
       .select("id")
       .eq("id", session.user.id)
       .single();
 
-    if (!existingGuest) {
+    if (existingGuest) {
+      await supabase
+        .from("guests")
+        .update({
+          full_name: booking.guest_name,
+          email: booking.guest_email,
+          phone: booking.guest_phone,
+          suite_type: booking.suite_type,
+          check_in: booking.check_in,
+          check_out: booking.check_out,
+        })
+        .eq("id", session.user.id);
+    } else {
       await supabase.from("guests").insert({
         id: session.user.id,
         full_name: booking.guest_name,
@@ -122,11 +156,19 @@ export default function GuestLoginPage() {
       });
     }
 
-    // Link booking to guest
-    await supabase
-      .from("lodgify_bookings")
-      .update({ guest_id: session.user.id })
-      .eq("id", booking.id);
+    // Link booking to guest via server endpoint (anon key has UPDATE permission)
+    const linkRes = await fetch("/api/activate-booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: code.trim(), user_id: session.user.id }),
+    });
+
+    if (!linkRes.ok) {
+      const linkData = await linkRes.json();
+      setError(linkData.error || "No se pudo vincular la reserva.");
+      setLoading(false);
+      return;
+    }
 
     setLoading(false);
     router.push("/huespedes/perfil");
