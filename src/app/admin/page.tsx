@@ -16,6 +16,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { CATEGORY_META } from "@/lib/types";
 import type { BusinessCategory } from "@/lib/types";
@@ -57,7 +59,23 @@ interface Stats {
   pendingRequests: number;
 }
 
-type Tab = "negocios" | "promos" | "huespedes" | "solicitudes" | "stats";
+interface LodgifyBookingRow {
+  id: string;
+  lodgify_booking_id: number;
+  access_code: string;
+  guest_name: string;
+  guest_email: string;
+  guest_phone: string;
+  suite_type: string;
+  check_in: string;
+  check_out: string;
+  status: string;
+  guest_id: string | null;
+  lodgify_source: string;
+  created_at: string;
+}
+
+type Tab = "negocios" | "promos" | "reservas" | "huespedes" | "solicitudes" | "stats";
 
 const emptyBusiness: Omit<BusinessRow, "id"> = {
   name: "",
@@ -97,6 +115,10 @@ export default function AdminDashboard() {
   const [serviceRequests, setServiceRequests] = useState<{ id: string; guest_id: string; service_id: string; status: string; requested_date: string | null; message: string; created_at: string }[]>([]);
   const [servicesCatalog, setServicesCatalog] = useState<{ id: string; name: string; icon: string }[]>([]);
 
+  // Lodgify bookings
+  const [lodgifyBookings, setLodgifyBookings] = useState<LodgifyBookingRow[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
   // Business form
   const [editingBiz, setEditingBiz] = useState<Partial<BusinessRow> | null>(null);
   const [bizSaving, setBizSaving] = useState(false);
@@ -107,13 +129,14 @@ export default function AdminDashboard() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [bizRes, promoRes, redemptionRes, guestRes, reqRes, svcRes] = await Promise.all([
+    const [bizRes, promoRes, redemptionRes, guestRes, reqRes, svcRes, lodgifyRes] = await Promise.all([
       supabase.from("businesses").select("*").order("name").returns<BusinessRow[]>(),
       supabase.from("promotions").select("*").order("title").returns<PromotionRow[]>(),
       supabase.from("redemptions").select("id, redeemed_at").returns<{ id: string; redeemed_at: string }[]>(),
       supabase.from("guests").select("*").order("created_at", { ascending: false }).returns<{ id: string; full_name: string; email: string; phone: string; suite_type: string; check_in: string | null; check_out: string | null }[]>(),
       supabase.from("service_requests").select("*").order("created_at", { ascending: false }).returns<{ id: string; guest_id: string; service_id: string; status: string; requested_date: string | null; message: string; created_at: string }[]>(),
       supabase.from("services").select("id, name, icon").returns<{ id: string; name: string; icon: string }[]>(),
+      supabase.from("lodgify_bookings").select("*").order("check_in", { ascending: false }).returns<LodgifyBookingRow[]>(),
     ]);
 
     const biz = bizRes.data ?? [];
@@ -128,6 +151,7 @@ export default function AdminDashboard() {
     setGuests(guestsData);
     setServiceRequests(requestsData);
     setServicesCatalog(svcRes.data ?? []);
+    setLodgifyBookings(lodgifyRes.data ?? []);
 
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
     setStats({
@@ -208,6 +232,7 @@ export default function AdminDashboard() {
         {[
           { key: "negocios" as Tab, label: "Negocios", icon: Store },
           { key: "promos" as Tab, label: "Promos", icon: Tag },
+          { key: "reservas" as Tab, label: "Reservas", icon: KeyRound },
           { key: "huespedes" as Tab, label: "Huéspedes", icon: Users },
           { key: "solicitudes" as Tab, label: "Solicitudes", icon: ShoppingBag },
           { key: "stats" as Tab, label: "Stats", icon: BarChart3 },
@@ -591,6 +616,73 @@ export default function AdminDashboard() {
               </p>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ============ RESERVAS TAB (Lodgify) ============ */}
+      {tab === "reservas" && (
+        <div>
+          <h2 className="mb-4 text-lg font-bold text-text-primary">Reservas Lodgify ({lodgifyBookings.length})</h2>
+          {lodgifyBookings.length === 0 ? (
+            <div className="py-12 text-center">
+              <KeyRound className="mx-auto mb-3 h-10 w-10 text-text-secondary opacity-40" />
+              <p className="text-sm text-text-secondary">
+                No hay reservas. Configura el webhook de Lodgify para recibir reservas automáticamente.
+              </p>
+              <p className="mt-2 text-xs text-text-secondary">
+                Webhook URL: <code className="rounded bg-surface-secondary px-1.5 py-0.5 text-[11px]">{typeof window !== "undefined" ? window.location.origin : ""}/api/webhooks/lodgify?secret=***</code>
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {lodgifyBookings.map((bk) => {
+                const statusColors: Record<string, string> = {
+                  active: "bg-green-100 text-green-700",
+                  checked_in: "bg-blue-100 text-blue-700",
+                  checked_out: "bg-gray-100 text-gray-600",
+                  cancelled: "bg-red-100 text-red-600",
+                };
+                return (
+                  <div key={bk.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-accent/10">
+                        <KeyRound className="h-5 w-5 text-brand-accent" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-text-primary">{bk.guest_name || "Sin nombre"}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[bk.status] ?? statusColors.active}`}>
+                            {bk.status}
+                          </span>
+                          {bk.guest_id && (
+                            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] text-purple-700">Vinculado</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-text-secondary">{bk.guest_email} · {bk.suite_type || "—"}</p>
+                        <p className="text-xs text-text-secondary">{bk.check_in} → {bk.check_out} · Lodgify #{bk.lodgify_booking_id}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <code className="rounded-lg bg-surface-secondary px-2.5 py-1.5 text-xs font-bold tracking-wider text-brand">
+                          {bk.access_code}
+                        </code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(bk.access_code);
+                            setCopiedCode(bk.id);
+                            setTimeout(() => setCopiedCode(null), 2000);
+                          }}
+                          className="rounded-lg p-1.5 text-text-secondary hover:bg-surface-secondary hover:text-brand-accent"
+                          title="Copiar código"
+                        >
+                          {copiedCode === bk.id ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
