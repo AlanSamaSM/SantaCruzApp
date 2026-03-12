@@ -87,11 +87,11 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 100) onClose();
             }}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-white shadow-2xl pb-[env(safe-area-inset-bottom)]"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-white/40 bg-white/80 shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)]"
           >
             {/* Drag handle */}
-            <div className="sticky top-0 flex justify-center bg-white pt-3 pb-2">
-              <div className="h-1 w-10 rounded-full bg-border" />
+            <div className="sticky top-0 flex justify-center bg-white/80 backdrop-blur-xl pt-3 pb-2">
+              <div className="h-1 w-10 rounded-full bg-black/15" />
             </div>
 
             <div className="px-5 pb-6">
@@ -110,10 +110,7 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
                     )}
                   </div>
                   <span
-                    className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                    style={{
-                      backgroundColor: CATEGORY_META[business.category].color,
-                    }}
+                    className="mt-1 inline-block rounded-full bg-brand/10 px-2.5 py-0.5 text-[10px] font-semibold text-brand"
                   >
                     {CATEGORY_META[business.category].label}
                   </span>
@@ -168,7 +165,7 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}&travelmode=walking`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-secondary px-4 py-4 text-base font-medium text-text-primary shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                className="mb-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-4 text-base font-medium text-white shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
               >
                 <Navigation className="h-5 w-5" />
                 Cómo llegar

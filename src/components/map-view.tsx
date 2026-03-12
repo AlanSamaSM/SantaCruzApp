@@ -9,7 +9,6 @@ import MapGL, {
   type ViewStateChangeEvent,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MapPin } from "lucide-react";
 import { SANTA_CRUZ_COORDS, MAP_DEFAULT_ZOOM } from "@/lib/constants";
 import { CATEGORY_META, type BusinessWithPromotion } from "@/lib/types";
 
@@ -39,13 +38,12 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
       {...viewState}
       onMove={handleMove}
       mapboxAccessToken={MAPBOX_TOKEN}
-      mapStyle="mapbox://styles/mapbox/streets-v12"
+      mapStyle="mapbox://styles/mapbox/light-v11"
       style={{ width: "100%", height: "100%" }}
       maxZoom={18}
       minZoom={12}
       attributionControl={false}
     >
-      {/* Navigation controls */}
       <NavigationControl position="top-right" showCompass={false} />
       <GeolocateControl
         position="top-right"
@@ -53,22 +51,17 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
         showUserHeading
       />
 
-      {/* Santa Cruz Suites marker — home base */}
+      {/* Santa Cruz home pin */}
       <Marker
         latitude={SANTA_CRUZ_COORDS.lat}
         longitude={SANTA_CRUZ_COORDS.lng}
         anchor="bottom"
       >
-        <div className="flex flex-col items-center animate-marker-drop">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-brand-accent/40 animate-pulse-ring" />
-            <div className="relative rounded-full bg-gradient-to-br from-brand to-brand/80 p-2.5 shadow-xl ring-3 ring-white">
-              <MapPin className="h-6 w-6 text-brand-accent" />
-            </div>
+        <div className="flex flex-col items-center animate-marker-pop">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand shadow-lg ring-2 ring-brand-accent">
+            <span className="text-base text-brand-accent font-bold">SC</span>
           </div>
-          <span className="mt-1.5 rounded-full bg-brand px-3 py-1 text-[11px] font-bold text-white shadow-lg">
-            Santa Cruz
-          </span>
+          <div className="h-2 w-0.5 bg-brand" />
         </div>
       </Marker>
 
@@ -87,37 +80,30 @@ export function MapView({ businesses, onSelectBusiness }: MapViewProps) {
               mapRef.current?.flyTo({
                 center: [biz.lng, biz.lat],
                 zoom: 16.5,
-                duration: 800,
+                duration: 600,
               });
             }}
           >
             <button
-              className="group flex flex-col items-center outline-none animate-marker-drop"
-              style={{ animationDelay: `${i * 60}ms` }}
+              className="group flex flex-col items-center outline-none animate-marker-pop"
+              style={{ animationDelay: `${i * 40}ms` }}
               aria-label={`Ver ${biz.name}`}
             >
-              {/* Colored glow behind marker */}
               <div className="relative">
                 <div
-                  className="absolute -inset-1 rounded-full opacity-30 blur-sm transition-opacity group-hover:opacity-50"
-                  style={{ backgroundColor: meta.color }}
-                />
-                <div
-                  className={`relative flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform group-hover:scale-115 group-active:scale-95 ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-md transition-transform duration-150 group-hover:scale-110 group-active:scale-95 ${
                     biz.isFeatured
-                      ? "ring-2 ring-brand-accent ring-offset-2"
-                      : "ring-2 ring-white/80"
+                      ? "bg-brand-accent ring-1 ring-brand-accent/50"
+                      : "bg-brand ring-1 ring-brand/30"
                   }`}
-                  style={{ backgroundColor: meta.color }}
                 >
-                  <span className="text-xl drop-shadow-sm">{meta.emoji}</span>
+                  <span className="text-lg">{meta.emoji}</span>
                 </div>
+                {biz.promotion && (
+                  <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-brand-accent ring-2 ring-white" />
+                )}
               </div>
-              {biz.promotion && (
-                <span className="mt-1 rounded-full bg-gradient-to-r from-brand-accent to-amber-400 px-2.5 py-0.5 text-[10px] font-bold text-brand shadow-md animate-bounce-subtle">
-                  ✨ PROMO
-                </span>
-              )}
+              <div className="mt-0.5 h-1.5 w-0.5 rounded-full bg-brand/40" />
             </button>
           </Marker>
         );

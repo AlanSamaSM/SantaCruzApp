@@ -2,7 +2,7 @@
 
 import { CATEGORY_META, type BusinessCategory } from "@/lib/types";
 
-/** Floating legend showing category colors on the map */
+/** Floating legend — iOS frosted glass pill */
 export function CategoryFilter() {
   const categories = Object.entries(CATEGORY_META) as [
     BusinessCategory,
@@ -10,22 +10,16 @@ export function CategoryFilter() {
   ][];
 
   return (
-    <div className="absolute left-3 top-3 z-10 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-xl backdrop-blur-md">
-      <div className="flex flex-wrap gap-3">
-        {categories.map(([key, meta]) => (
-          <div key={key} className="flex items-center gap-2">
-            <div
-              className="flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
-              style={{ backgroundColor: meta.color }}
-            >
-              <span className="text-xs">{meta.emoji}</span>
-            </div>
-            <span className="text-xs font-semibold text-text-primary">
-              {meta.label}
-            </span>
-          </div>
-        ))}
-      </div>
+    <div className="absolute left-3 top-3 z-10 flex gap-1.5 rounded-2xl border border-white/40 bg-white/70 px-3 py-2 shadow-lg backdrop-blur-xl">
+      {categories.map(([key, meta]) => (
+        <div
+          key={key}
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/8 transition-colors"
+          title={meta.label}
+        >
+          <span className="text-sm">{meta.emoji}</span>
+        </div>
+      ))}
     </div>
   );
 }

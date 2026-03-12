@@ -37,9 +37,9 @@ export const CATEGORY_META: Record<
   BusinessCategory,
   { label: string; color: string; emoji: string }
 > = {
-  restaurante: { label: "Restaurante", color: "#f43f5e", emoji: "🍽️" },
-  cafe: { label: "Café", color: "#d97706", emoji: "☕" },
-  bar: { label: "Bar & Cervecería", color: "#f59e0b", emoji: "🍺" },
-  tour: { label: "Tours & Aventura", color: "#0ea5e9", emoji: "🏄" },
-  tienda: { label: "Tienda", color: "#a855f7", emoji: "🛍️" },
+  restaurante: { label: "Restaurante", color: "#1a1a2e", emoji: "🍽️" },
+  cafe: { label: "Café", color: "#1a1a2e", emoji: "☕" },
+  bar: { label: "Bar & Cervecería", color: "#1a1a2e", emoji: "🍺" },
+  tour: { label: "Tours & Aventura", color: "#1a1a2e", emoji: "🏄" },
+  tienda: { label: "Tienda", color: "#1a1a2e", emoji: "🛍️" },
 };
