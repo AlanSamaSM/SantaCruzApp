@@ -71,7 +71,7 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/20"
+            className="fixed inset-0 z-[60] bg-black/20"
             onClick={onClose}
           />
 
@@ -87,7 +87,7 @@ export function BusinessDetail({ business, onClose }: BusinessDetailProps) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 100) onClose();
             }}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-white/40 bg-white/80 shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)]"
+            className="fixed inset-x-0 bottom-0 z-[70] max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-white/40 bg-white/80 shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)]"
           >
             {/* Drag handle */}
             <div className="sticky top-0 flex justify-center bg-white/80 backdrop-blur-xl pt-3 pb-2">
